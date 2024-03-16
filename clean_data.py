@@ -132,13 +132,15 @@ def convert_budget_to_usd(df, exchange_rates):
     return df
 
 
-def clean_dataset(file_path, exchange_rates_to_dolar):
+def clean_dataset(exchange_rates_to_dolar):
 
-    execution_log = {}
-    execution_log['erros'] = []
+    execution_log = dict()
+    execution_log['erros'] = list()
 
     try:
-        df = pd.read_csv(file_path, sep=";", encoding='utf-8', low_memory=False)
+        df = pd.read_csv(
+            'datasets/oscar_nominated_films_raw.csv', sep=";", encoding='utf-8', low_memory=False
+        )
 
         # df = df.loc[df['film'] == 'Cleopatra']
 
@@ -153,9 +155,9 @@ def clean_dataset(file_path, exchange_rates_to_dolar):
         for column in string_columns:
             df[column] = df[column].astype(str).str.strip()
             df[column] = df[column].str.replace('nan', 'not_found')
+            df[column] = df[column].str.replace(r'\[.*?\]', '', regex=True).str.strip()
 
         df['year'] = df['year'].str.strip().str[:4].astype(int)
-        # running_time
 
         df = df.drop('id_json', axis=1)
         df = df.rename(
@@ -166,26 +168,18 @@ def clean_dataset(file_path, exchange_rates_to_dolar):
 
         df = convert_budget_to_usd(df, exchange_rates_to_dolar)
 
+        save_dataframe_to_csv(
+            df, "datasets/oscar_nominated_films_trusted.csv"
+        )
+
+        if len(df):
+            execution_log['status'] = 'success'
+            execution_log['records'] = len(df)
+
     except Exception as e:
         execution_log['erros'].append(e)
         pass
 
-    save_dataframe_to_csv(
-        df, "datasets/oscar_nominated_films_trusted.csv"
-    )
-
-    if len(df):
-        execution_log['status'] = 'success'
-        execution_log['records'] = len(df)
+    print(execution_log)
 
     return execution_log
-
-
-"""
-usage: 
-
-print(clean_dataset(
-    file_path='datasets/oscar_nominated_films.csv',
-    exchange_rates_to_dolar={'GBP': 1.2731, 'EUR': 1.0895}
-))
-"""
