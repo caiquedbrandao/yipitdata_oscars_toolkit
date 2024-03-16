@@ -66,7 +66,7 @@ def get_oscars_films_data():
                     df = convert_jsons_to_dataframe(processed_data)
                     df.columns = df.columns.str.lower().str.replace(' ', '_')
                     save_dataframe_to_csv(
-                        df, "datasets/oscar_nominated_films.csv"
+                        df, "datasets/oscar_nominated_films_raw.csv"
                     )
 
         # Save csv file
