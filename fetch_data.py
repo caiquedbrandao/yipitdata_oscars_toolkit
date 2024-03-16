@@ -2,7 +2,7 @@ import os
 import requests
 import pandas as pd
 from urllib.parse import unquote
-from utils import read_csv, remove_line_breaks, convert_jsons_to_dataframe, save_dataframe_to_csv
+from utils import convert_jsons_to_dataframe, save_dataframe_to_csv
 
 
 def get_film_details(url):
@@ -15,7 +15,9 @@ def get_film_details(url):
         return {}
 
 
-def process_response_data(url_api):
+def process_response_data():
+
+    url_api = "http://oscars.yipitdata.com/"
 
     processed_data = []
     film_counter = 0
@@ -53,9 +55,11 @@ def process_response_data(url_api):
                         clean_key = key.strip()
                         film_data[clean_key] = value
                     processed_data.append(film_data)
+                    film_data['log'] = None
 
                 except Exception as e:
                     print('Error: ', e)
+                    film_data['log'] = 'Error trying to get films details, url blocked'
                     pass
 
                 if film_counter % 10 == 0:
@@ -87,6 +91,5 @@ def process_response_data(url_api):
     return log_api_data
 
 
-url = "http://oscars.yipitdata.com/"
-log = process_response_data(url)
+log = process_response_data()
 print(log)
